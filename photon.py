@@ -25,3 +25,6 @@ class Photon:
     def get_trajectory(self):
         trajectory = [[born, interaction] for born, interaction in zip(self.point_born, self.point_interaction)]
         return trajectory
+
+    def get_point_interaction(self):
+        return self.point_interaction
