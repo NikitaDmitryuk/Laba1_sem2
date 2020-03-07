@@ -38,3 +38,4 @@ class Source:
         data = np.array(loadData('energy.txt'))
         self.photon_energy_list = data[:, 0]
         self.compton_energy_list = data[:, 1]
+        self.total_energy = data[:, 2]
