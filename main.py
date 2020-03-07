@@ -35,7 +35,7 @@ def main():
     source.set_point_interaction()
     source.delete_photones()
 
-    # plot_trajectory(source)
+    plot_trajectory(source)
 
 
 if __name__ == '__main__':

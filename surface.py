@@ -8,7 +8,7 @@ class Surface:
         self.h = h
 
     def is_in(self, photon):
-        point_interaction = photon.get_point_interaction()
+        point_interaction = photon.get_last_position()
         is_in_surface = True
         is_in_surface *= (point_interaction[2] < self.h) and (point_interaction[2] > 0)
         is_in_surface *= point_interaction[0] ** 2 + point_interaction[1] ** 2 < self.r ** 2
