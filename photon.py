@@ -4,7 +4,7 @@ from numpy import random
 import numpy as np
 
 
-def loadData(name):
+def load_data(name):
     data = []
     with open(name) as f:
         for line in f:
@@ -14,30 +14,47 @@ def loadData(name):
 
 class Photon:
 
-    data = np.array(loadData('energy.txt'))
+    data = np.array(load_data('energy.txt'))
     photon_energy_list = data[:, 0]
     compton_energy_list = data[:, 1]
     total_energy = data[:, 2]
 
-    def __init__(self, xy0, xy1, energy_photon):
+    def __init__(self, point_born, energy_photon):
         self.trajectory = []
-        point_born = [0, 0, 0]
-        point_born[0] = random.uniform(xy0[0], xy1[0])
-        point_born[1] = random.uniform(xy0[1], xy1[1])
-        point_born[2] = 0
+        self.energy_photon = []
         self.trajectory.append(point_born)
-        self.energy_photon = energy_photon
+        self.energy_photon.append(energy_photon)
         self.phi = random.uniform(0, 2 * pi)
         self.psi = random.uniform(0, pi)
 
     def set_point_of_interaction(self):
-        energy_total, _ = self.linear_inter(self.energy_photon)
-        length = - log(random.uniform(0, 1), e) / energy_total
+        length = - log(random.uniform(0, 1), e) / self.energy_photon[-1]
         point_interaction = [0, 0, 0]
         point_interaction[0] = length * cos(self.psi) * cos(self.phi) + self.trajectory[-1][0]
         point_interaction[1] = length * cos(self.psi) * sin(self.phi) + self.trajectory[-1][1]
         point_interaction[2] = length * sin(self.psi) + self.trajectory[-1][2]
         self.trajectory.append(point_interaction)
+
+    def set_new_energy(self):
+        a_old = self.get_last_energy() / 0.511
+        while True:
+            g1 = random.uniform(0, 1)
+            g2 = random.uniform(0, 1)
+            a = a_old * (1 + 2 * a_old * g1) / (1 + 2 * a_old)
+            if g2 * (1 + 2 * a_old + 1 / (1 + 2 * a_old)) < self.p(a, a_old):
+                break
+
+        mu = 1 - 1 / a + 1 / a_old
+        self.psi = acos(mu)
+        self.phi = random.uniform(0, 2 * pi)
+        self.energy_photon.append(a_old * 0.511 / (1 + a_old * (1 - mu)))
+
+    def p(self, x, a_old):
+        return x / a_old + a_old / x + (1 / a_old - 1 / x) * (2 + 1 / a_old - 1 / x)
+
+    def is_compton_interaction(self):
+        energy_total, energy_compton = self.linear_inter(self.get_last_energy())
+        return energy_compton / energy_total > random.uniform(0, 1)
 
     def get_trajectory(self):
         x = []
@@ -53,6 +70,12 @@ class Photon:
     def get_last_position(self):
         return self.trajectory[-1]
 
+    def get_last_energy(self):
+        return self.energy_photon[-1]
+
+    def delete_last_position(self):
+        self.trajectory.pop()
+
     def linear_inter(self, energy):
         for i in range(len(self.photon_energy_list)-1):
             if (self.photon_energy_list[i] < energy) and (self.photon_energy_list[i+1] > energy):
@@ -65,3 +88,5 @@ class Photon:
                                (energy - self.photon_energy_list[i])
 
                 return [energy_total, energy_compton]
+
+        print("Выход за пределы энергий")

@@ -1,6 +1,9 @@
 from photon import Photon
 from source import Source
 from surface import Surface
+from cylinder import Cylinder
+from rectangular_source import RectangularSource
+from modeling import Modeling
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
@@ -29,13 +32,13 @@ def plot_trajectory(source):
 
 def main():
 
-    surface = Surface(5, 2)
-    source = Source([-2.5, -2.5], [2.5, 2.5], surface)
-    source.born_photon(500, 3.5)
-    source.set_point_interaction()
-    source.delete_photones()
+    surface = Cylinder(5, 2)
+    source = RectangularSource([-2.5, -2.5], [2.5, 2.5])
+    modeling = Modeling(surface, source)
+    modeling.set_photones(100, 3.5)
+    modeling.start_of_modeling()
 
-    plot_trajectory(source)
+    plot_trajectory(modeling)
 
 
 if __name__ == '__main__':
