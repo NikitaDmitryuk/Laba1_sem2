@@ -35,7 +35,7 @@ def main():
     surface = Cylinder(5, 2)
     source = RectangularSource([-2.5, -2.5], [2.5, 2.5])
     modeling = Modeling(surface, source)
-    modeling.set_photones(100, 3.5)
+    modeling.set_photones(1000, 3.5)
     modeling.start_of_modeling()
 
     plot_trajectory(modeling)

@@ -45,7 +45,7 @@ class Photon:
                 break
 
         mu = 1 - 1 / a + 1 / a_old
-        self.psi = acos(mu)
+        self.psi = acos(mu) - pi / 2
         self.phi = random.uniform(0, 2 * pi)
         self.energy_photon.append(a_old * 0.511 / (1 + a_old * (1 - mu)))
 
