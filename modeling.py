@@ -14,6 +14,12 @@ class Modeling:
         self.surface = surface
         self.source = source
 
+    def get_surface(self):
+        return self.surface
+
+    def get_source(self):
+        return self.source
+
     def set_photones(self, n, energy):
         [self.photones.append(self.source.born_photon(energy)) for _ in range(n)]
 
