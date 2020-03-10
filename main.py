@@ -34,10 +34,10 @@ def plot_trajectory(modeling):
 
 def main():
 
-    n = 100
+    n = 100000
     start_energy = 3.5
     surface_radius = 5
-    surface_height = 2
+    surface_height = 4
     source_height = 5
     source_width = 5
 

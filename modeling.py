@@ -34,7 +34,7 @@ class Modeling:
     def set_point_interaction(self):
         photones = []
         for i in range(len(self.photones)):
-            if self.photones[i].is_compton_interaction():
+            if self.photones[i].is_compton_interaction() and self.photones[i].is_interaction_likely():
                 self.photones[i].set_point_of_interaction()
                 if self.surface.is_in(self.photones[i]):
                     self.photones[i].set_new_energy()
