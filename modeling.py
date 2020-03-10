@@ -32,8 +32,20 @@ class Modeling:
                 self.set_photones(1, energy)
 
     def set_point_interaction(self):
-        for photon in self.photones:
-            photon.set_point_of_interaction()
+        photones = []
+        for i in range(len(self.photones)):
+            if self.photones[i].is_compton_interaction():
+                self.photones[i].set_point_of_interaction()
+                if self.surface.is_in(self.photones[i]):
+                    self.photones[i].set_new_energy()
+                    photones.append(self.photones[i])
+                else:
+                    self.photones[i].delete_last_position()
+                    self.dell_photones.append(self.photones[i])
+            else:
+                self.dell_photones.append(self.photones[i])
+
+        self.photones = photones
 
     def get_delete_photones(self):
         return self.dell_photones
@@ -41,21 +53,9 @@ class Modeling:
     def get_photones(self):
         return self.photones
 
-    def set_new_energy_photones(self):
-        [photon.set_new_energy() for photon in self.photones]
-
-    def clear_photones(self):
-        for photon in self.photones:
-            if not self.surface.is_in(photon) or not photon.is_compton_interaction():
-                photon.delete_last_position()
-                self.dell_photones.append(photon)
-                self.photones.remove(photon)
-
     def is_empty_photones(self):
         return len(self.photones) == 0
 
     def start_of_modeling(self):
         while not self.is_empty_photones():
             self.set_point_interaction()
-            self.clear_photones()
-            self.set_new_energy_photones()

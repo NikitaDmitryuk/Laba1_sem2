@@ -8,9 +8,9 @@ import matplotlib.pyplot as plt
 
 class RectangularSource(Source):
 
-    def __init__(self, xy0, xy1):
-        self.xy0 = xy0
-        self.xy1 = xy1
+    def __init__(self, source_height, source_width):
+        self.xy0 = [-source_width / 2, -source_height / 2]
+        self.xy1 = [source_width / 2, source_height / 2]
 
     def born_photon(self, energy):
         point_born = [0, 0, 0]
