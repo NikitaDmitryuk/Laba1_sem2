@@ -17,7 +17,7 @@ def plot_trajectory(modeling):
     modeling.get_source().plot_source(ax)
     modeling.get_surface().plot_surface(ax)
 
-    for photon in modeling.get_photones():
+    for photon in modeling.get_delete_photones():
         trajectory = photon.get_trajectory()
         ax.plot(trajectory[0], trajectory[1], trajectory[2], '--.')
 
@@ -33,11 +33,16 @@ def plot_trajectory(modeling):
 
 
 def main():
+    n = 100
+    start_energy = 4
+    radius = 5
+    height = 2
+    point_source_1 = [-2.5, -2.5]
+    point_source_2 = [2.5, 2.5]
 
-    surface = CylinderSurface(5, 2)
-    source = RectangularSource([-2.5, -2.5], [2.5, 2.5])
-    modeling = Modeling(surface, source)
-    modeling.set_photones(50, 3.5)
+    surface = CylinderSurface(radius, height)
+    source = RectangularSource(point_source_1, point_source_2)
+    modeling = Modeling(surface, source, n, start_energy)
     modeling.start_of_modeling()
 
     plot_trajectory(modeling)

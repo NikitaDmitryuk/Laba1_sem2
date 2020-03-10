@@ -2,6 +2,7 @@
 from math import *
 from numpy import random
 import numpy as np
+import matplotlib.pyplot as plt
 
 
 def load_data(name):
@@ -12,12 +13,23 @@ def load_data(name):
     return data
 
 
+def plot_energy(x, y, _xlim):
+    fig = plt.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(x, y, '--.')
+    ax.grid(True)
+    plt.xlim(_xlim)
+    plt.show()
+
+
 class Photon:
 
     data = np.array(load_data('energy.txt'))
     photon_energy_list = data[:, 0]
     compton_energy_list = data[:, 1]
-    total_energy = data[:, 2]
+    total_energy_list = data[:, 2]
+    # plot_energy(photon_energy_list, total_energy_list, [0, 4])
+    # plot_energy(photon_energy_list, compton_energy_list, [0, 4])
 
     def __init__(self, point_born, energy_photon):
         self.trajectory = []
@@ -26,6 +38,8 @@ class Photon:
         self.energy_photon.append(energy_photon)
         self.phi = random.uniform(0, 2 * pi)
         self.psi = random.uniform(0, pi)
+        self.set_point_of_interaction()
+        self.set_new_energy()
 
     def set_point_of_interaction(self):
         length = - log(random.uniform(0, 1), e) / self.energy_photon[-1]
@@ -53,7 +67,8 @@ class Photon:
         return x / a_old + a_old / x + (1 / a_old - 1 / x) * (2 + 1 / a_old - 1 / x)
 
     def is_compton_interaction(self):
-        energy_total, energy_compton = self.linear_inter(self.get_last_energy())
+        energy_photon = self.get_last_energy()
+        energy_total, energy_compton = self.linear_inter(energy_photon)
         return energy_compton / energy_total > random.uniform(0, 1)
 
     def get_trajectory(self):
@@ -78,9 +93,9 @@ class Photon:
 
     def linear_inter(self, energy):
         for i in range(len(self.photon_energy_list)-1):
-            if (self.photon_energy_list[i] < energy) and (self.photon_energy_list[i+1] > energy):
-                energy_total = self.total_energy[i] + (self.total_energy[i+1] - self.total_energy[i]) /\
-                               (self.photon_energy_list[i+1] - self.photon_energy_list[i]) *\
+            if (self.photon_energy_list[i] <= energy) and (self.photon_energy_list[i+1] >= energy):
+                energy_total = self.total_energy_list[i] + (self.total_energy_list[i + 1] - self.total_energy_list[i]) / \
+                               (self.photon_energy_list[i+1] - self.photon_energy_list[i]) * \
                                (energy - self.photon_energy_list[i])
 
                 energy_compton = self.compton_energy_list[i] + (self.compton_energy_list[i+1] - self.compton_energy_list[i]) /\
