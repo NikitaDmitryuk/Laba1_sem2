@@ -23,21 +23,13 @@ def plot_trajectory(modeling):
 
     plt.show()
 
-    # fig = plt.figure()
-    # ax = fig.gca()
-    # for photon in modeling.get_photones():
-    #     trajectory = photon.get_trajectory()
-    #     ax.scatter(trajectory[0][0], trajectory[1][0])
-    #
-    # plt.show()
-
 
 def main():
 
-    n = 100
+    n = 1000
     start_energy = 3.5
     surface_radius = 5
-    surface_height = 4
+    surface_height = 2
     source_height = 5
     source_width = 5
 
@@ -46,7 +38,7 @@ def main():
     modeling = Modeling(surface, source, n, start_energy)
     modeling.start_of_modeling()
 
-    plot_trajectory(modeling)
+    # plot_trajectory(modeling)
 
 
 if __name__ == '__main__':

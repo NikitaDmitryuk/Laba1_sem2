@@ -4,6 +4,8 @@ from photon import Photon
 from numpy import random
 from source import Source
 import numpy as np
+import collections
+import multiprocessing
 
 
 class Modeling:
@@ -34,16 +36,17 @@ class Modeling:
     def set_point_interaction(self):
         photones = []
         for i in range(len(self.photones)):
-            if self.photones[i].is_compton_interaction() and self.photones[i].is_interaction_likely():
-                self.photones[i].set_point_of_interaction()
-                if self.surface.is_in(self.photones[i]):
-                    self.photones[i].set_new_energy()
-                    photones.append(self.photones[i])
+            photon = self.photones[i]
+            if photon.is_compton_interaction() and photon.is_interaction_likely():
+                photon.set_point_of_interaction()
+                if self.surface.is_in(photon):
+                    photon.set_new_energy()
+                    photones.append(photon)
                 else:
-                    self.photones[i].delete_last_position()
-                    self.dell_photones.append(self.photones[i])
+                    photon.delete_last_position()
+                    self.dell_photones.append(photon)
             else:
-                self.dell_photones.append(self.photones[i])
+                self.dell_photones.append(photon)
 
         self.photones = photones
 
@@ -53,9 +56,6 @@ class Modeling:
     def get_photones(self):
         return self.photones
 
-    def is_empty_photones(self):
-        return len(self.photones) == 0
-
     def start_of_modeling(self):
-        while not self.is_empty_photones():
+        while len(self.photones) != 0:
             self.set_point_interaction()
