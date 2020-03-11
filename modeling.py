@@ -5,7 +5,7 @@ from numpy import random
 from source import Source
 import numpy as np
 import collections
-import multiprocessing
+from multiprocessing import Pool
 
 
 class Modeling:
@@ -33,10 +33,11 @@ class Modeling:
             else:
                 self.set_photones(1, energy)
 
-    def set_point_interaction(self):
+    def set_point_interaction(self, photones_list):
         photones = []
-        for i in range(len(self.photones)):
-            photon = self.photones[i]
+        dell_photones = []
+        for i in range(len(photones_list)):
+            photon = photones_list[i]
             if photon.is_compton_interaction() and photon.is_interaction_likely():
                 photon.set_point_of_interaction()
                 if self.surface.is_in(photon):
@@ -44,11 +45,11 @@ class Modeling:
                     photones.append(photon)
                 else:
                     photon.delete_last_position()
-                    self.dell_photones.append(photon)
+                    dell_photones.append(photon)
             else:
-                self.dell_photones.append(photon)
+                dell_photones.append(photon)
 
-        self.photones = photones
+        return [photones, dell_photones]
 
     def get_delete_photones(self):
         return self.dell_photones
@@ -57,5 +58,19 @@ class Modeling:
         return self.photones
 
     def start_of_modeling(self):
+        pool = Pool(processes=6)
         while len(self.photones) != 0:
-            self.set_point_interaction()
+            photones = []
+            step = int(len(self.photones) / 6)
+            if step != 0:
+                list_p = [self.photones[d:d+step] for d in range(0, len(self.photones), step)]
+            else:
+                list_p = [self.photones]
+
+            result = pool.map(self.set_point_interaction, list_p)
+
+            for elem in result:
+                photones += elem[0]
+                self.dell_photones += elem[1]
+
+            self.photones = photones

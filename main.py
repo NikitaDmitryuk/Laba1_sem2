@@ -26,7 +26,7 @@ def plot_trajectory(modeling):
 
 def main():
 
-    n = 1000
+    n = 10000
     start_energy = 3.5
     surface_radius = 5
     surface_height = 2
@@ -36,6 +36,7 @@ def main():
     surface = CylinderSurface(surface_radius, surface_height)
     source = RectangularSource(source_height, source_width)
     modeling = Modeling(surface, source, n, start_energy)
+    print("start modeling")
     modeling.start_of_modeling()
 
     # plot_trajectory(modeling)
