@@ -7,6 +7,7 @@ from modeling import Modeling
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
+import time
 
 
 def plot_trajectory(modeling):
@@ -26,17 +27,25 @@ def plot_trajectory(modeling):
 
 def main():
 
+<<<<<<< HEAD
     n = 100000
+=======
+    n = 1000000
+>>>>>>> muliprocessing
     start_energy = 3.5
     surface_radius = 5
     surface_height = 2
     source_height = 5
     source_width = 5
 
+    start_time = time.clock()
+
     surface = CylinderSurface(surface_radius, surface_height)
     source = RectangularSource(source_height, source_width)
     modeling = Modeling(surface, source, n, start_energy)
     modeling.start_of_modeling()
+
+    print("{:g} s".format(time.clock() - start_time))
 
     # plot_trajectory(modeling)
 

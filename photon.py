@@ -26,8 +26,10 @@ def plot_energy(x, y, _xlim):
 class Photon:
 
     data = np.array(load_data('energy.txt'))
-    interp_sigma_total = interpolate.interp1d(data[:, 0], data[:, 2], kind='linear')
-    interp_sigma_compton = interpolate.interp1d(data[:, 0], data[:, 1], kind='linear')
+    sigma_total_interp = data[:, 2]
+    sigma_compton_interp = data[:, 1]
+    energy_photon_interp = data[:, 0]
+
     mc2 = 0.511
 
     def __init__(self, point_born, energy_photon):
@@ -38,16 +40,43 @@ class Photon:
         self.energy_photon.append(energy_photon)
         self.phi = random.uniform(0, 2 * pi)
         self.psi = random.uniform(0, pi)
+        self.sigma_compton, self.sigma_total = self.interpolate_linear(energy_photon)
         self.set_point_of_interaction()
         self.set_new_energy()
 
-    def set_point_of_interaction(self):
-        energy_photon = self.get_last_energy()
-        sigma_total = self.interp_sigma_total(energy_photon)
-        sigma_compton = self.interp_sigma_compton(energy_photon)
-        self.weight = self.weight * sigma_compton / sigma_total
+    def interpolate_linear(self, energy):
+        left = 0
+        right = len(self.energy_photon_interp) - 1
+        energy_photon_left = self.energy_photon_interp[left]
+        energy_photon_right = self.energy_photon_interp[right]
 
-        length = - log(random.uniform(0, 1), e) / sigma_total
+        while not energy_photon_left <= energy < energy_photon_right:
+            i = (right - left) // 2 + left
+            if energy < self.energy_photon_interp[i]:
+                right = i
+                energy_photon_right = self.energy_photon_interp[right]
+            else:
+                left = i
+                energy_photon_left = self.energy_photon_interp[left]
+
+        sigma_compton_0 = self.sigma_compton_interp[left]
+        sigma_compton_1 = self.sigma_compton_interp[right]
+
+        sigma_total_0 = self.sigma_total_interp[left]
+        sigma_total_1 = self.sigma_total_interp[right]
+
+        sigma_compton = sigma_compton_0 + (sigma_compton_1 - sigma_compton_0) *\
+                        (energy - energy_photon_left) / (energy_photon_right - energy_photon_left)
+
+        sigma_total = sigma_total_0 + (sigma_total_1 - sigma_total_0) * \
+                        (energy - energy_photon_left) / (energy_photon_right - energy_photon_left)
+
+        return [sigma_compton, sigma_total]
+
+    def set_point_of_interaction(self):
+        self.weight = self.weight * self.sigma_compton / self.sigma_total
+
+        length = - log(random.uniform(0, 1), e) / self.sigma_total
 
         point_interaction = [0, 0, 0]
         point_interaction[0] = length * cos(self.psi) * cos(self.phi) + self.trajectory[-1][0]
@@ -73,11 +102,9 @@ class Photon:
     def p(self, x, a_old):
         return x / a_old + a_old / x + (1 / a_old - 1 / x) * (2 + 1 / a_old - 1 / x)
 
-    def is_compton_interaction(self):
-        energy_photon = self.get_last_energy()
-        sigma_total = self.interp_sigma_total(energy_photon)
-        sigma_compton = self.interp_sigma_compton(energy_photon)
-        return sigma_compton / sigma_total > random.uniform(0, 1)
+    def is_compton_interaction_and_set_sigma(self):
+        self.sigma_compton, self.sigma_total = self.interpolate_linear(self.get_last_energy())
+        return self.sigma_compton / self.sigma_total > random.uniform(0, 1)
 
     def get_trajectory(self):
         x = []
