@@ -17,7 +17,7 @@ class Modeling:
         self.source = source
         self.n = n
         self.start_energy = start_energy
-        self.set_photones(n, start_energy)
+        self.set_photones(start_energy)
 
     def get_surface(self):
         return self.surface
@@ -25,13 +25,21 @@ class Modeling:
     def get_source(self):
         return self.source
 
-    def set_photones(self, n, energy):
+    def set_photones_process(self, n, energy):
         for _ in range(n):
             photon = self.source.born_photon(energy)
             if self.surface.is_in(photon):
                 self.photones.append(photon)
-            else:
-                self.set_photones(1, energy)
+
+        if n != 0:
+            self.set_photones_process(n, energy)
+
+
+    def set_photones(self, energy):
+        while len(self.photones) < self.n:
+            photon = self.source.born_photon(energy)
+            if self.surface.is_in(photon):
+                self.photones.append(photon)
 
     def set_point_interaction(self, photones_list):
         photones = []
