@@ -40,6 +40,7 @@ class Photon:
         self.energy_photon.append(energy_photon)
         self.phi = random.uniform(0, 2 * pi)
         self.psi = random.uniform(0, pi)
+        self.sigma_compton, self.sigma_total = self.interpolate_linear(energy_photon)
         self.set_point_of_interaction()
         self.set_new_energy()
 
@@ -73,11 +74,9 @@ class Photon:
         return [sigma_compton, sigma_total]
 
     def set_point_of_interaction(self):
-        energy_photon = self.get_last_energy()
-        sigma_compton, sigma_total = self.interpolate_linear(energy_photon)
-        self.weight = self.weight * sigma_compton / sigma_total
+        self.weight = self.weight * self.sigma_compton / self.sigma_total
 
-        length = - log(random.uniform(0, 1), e) / sigma_total
+        length = - log(random.uniform(0, 1), e) / self.sigma_total
 
         point_interaction = [0, 0, 0]
         point_interaction[0] = length * cos(self.psi) * cos(self.phi) + self.trajectory[-1][0]
@@ -103,10 +102,9 @@ class Photon:
     def p(self, x, a_old):
         return x / a_old + a_old / x + (1 / a_old - 1 / x) * (2 + 1 / a_old - 1 / x)
 
-    def is_compton_interaction(self):
-        energy_photon = self.get_last_energy()
-        sigma_compton, sigma_total = self.interpolate_linear(energy_photon)
-        return sigma_compton / sigma_total > random.uniform(0, 1)
+    def is_compton_interaction_and_set_sigma(self):
+        self.sigma_compton, self.sigma_total = self.interpolate_linear(self.get_last_energy())
+        return self.sigma_compton / self.sigma_total > random.uniform(0, 1)
 
     def get_trajectory(self):
         x = []

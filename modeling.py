@@ -17,7 +17,6 @@ class Modeling:
         self.source = source
         self.n = n
         self.start_energy = start_energy
-        self.set_photones(start_energy)
 
     def get_surface(self):
         return self.surface
@@ -25,28 +24,21 @@ class Modeling:
     def get_source(self):
         return self.source
 
-    def set_photones_process(self, n, energy):
-        for _ in range(n):
+    def set_photones(self, n):
+        photones = []
+        energy = self.start_energy
+        while len(photones) < n:
             photon = self.source.born_photon(energy)
             if self.surface.is_in(photon):
-                self.photones.append(photon)
-
-        if n != 0:
-            self.set_photones_process(n, energy)
-
-
-    def set_photones(self, energy):
-        while len(self.photones) < self.n:
-            photon = self.source.born_photon(energy)
-            if self.surface.is_in(photon):
-                self.photones.append(photon)
+                photones.append(photon)
+        return photones
 
     def set_point_interaction(self, photones_list):
         photones = []
         dell_photones = []
         for i in range(len(photones_list)):
             photon = photones_list[i]
-            if photon.is_compton_interaction() and photon.is_interaction_likely():
+            if photon.is_compton_interaction_and_set_sigma() and photon.is_interaction_likely():
                 photon.set_point_of_interaction()
                 if self.surface.is_in(photon):
                     photon.set_new_energy()
@@ -66,10 +58,33 @@ class Modeling:
         return self.photones
 
     def start_of_modeling(self):
+
+        print("start modeling")
+
         pool = Pool(processes=6)
+
+        print('photon making')
+
+        list_n = []
+        step = self.n // 6
+        sum__list_n = sum(list_n)
+
+        while sum__list_n != self.n:
+            if self.n - sum__list_n > step:
+                list_n.append(step)
+            else:
+                list_n.append(self.n - sum__list_n)
+            sum__list_n = sum(list_n)
+
+        result = pool.map(self.set_photones, list_n)
+        for res in result:
+            self.photones += res
+
+        print('calculation of the following interactions')
+
         while len(self.photones) != 0:
             photones = []
-            step = int(len(self.photones) / 6)
+            step = len(self.photones) // 6
             if step != 0:
                 list_p = [self.photones[d:d+step] for d in range(0, len(self.photones), step)]
             else:
@@ -82,3 +97,5 @@ class Modeling:
                 self.dell_photones += elem[1]
 
             self.photones = photones
+
+        print('finish modeling')
