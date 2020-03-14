@@ -65,20 +65,22 @@ class Modeling:
 
         print('photon making')
 
-        list_n = []
-        step = self.n // 6
-        sum__list_n = sum(list_n)
+        self.photones = self.set_photones(self.n)
 
-        while sum__list_n != self.n:
-            if self.n - sum__list_n > step:
-                list_n.append(step)
-            else:
-                list_n.append(self.n - sum__list_n)
-            sum__list_n = sum(list_n)
-
-        result = pool.map(self.set_photones, list_n)
-        for res in result:
-            self.photones += res
+        # list_n = []
+        # step = self.n // 6
+        # sum__list_n = sum(list_n)
+        #
+        # while sum__list_n != self.n:
+        #     if self.n - sum__list_n > step:
+        #         list_n.append(step)
+        #     else:
+        #         list_n.append(self.n - sum__list_n)
+        #     sum__list_n = sum(list_n)
+        #
+        # result = pool.map(self.set_photones, list_n)
+        # for res in result:
+        #     self.photones += res
 
         print('calculation of the following interactions')
 

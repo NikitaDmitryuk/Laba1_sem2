@@ -1,9 +1,8 @@
 
 from math import *
-from numpy import random
+from numpy import *
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy import interpolate
 
 
 def load_data(name):
@@ -45,12 +44,19 @@ class Photon:
         self.set_new_energy()
 
     def interpolate_linear(self, energy):
+
         left = 0
         right = len(self.energy_photon_interp) - 1
         energy_photon_left = self.energy_photon_interp[left]
         energy_photon_right = self.energy_photon_interp[right]
 
-        while not energy_photon_left <= energy < energy_photon_right:
+        if energy <= energy_photon_left:
+            return [self.sigma_compton_interp[0], self.sigma_total_interp[0]]
+
+        if energy >= energy_photon_right:
+            return [self.sigma_compton_interp[-1], self.sigma_total_interp[-1]]
+
+        while right - left > 1:
             i = (right - left) // 2 + left
             if energy < self.energy_photon_interp[i]:
                 right = i
@@ -65,6 +71,9 @@ class Photon:
         sigma_total_0 = self.sigma_total_interp[left]
         sigma_total_1 = self.sigma_total_interp[right]
 
+        if energy_photon_right - energy_photon_left == 0:
+            print('херня')
+
         sigma_compton = sigma_compton_0 + (sigma_compton_1 - sigma_compton_0) *\
                         (energy - energy_photon_left) / (energy_photon_right - energy_photon_left)
 
@@ -74,9 +83,9 @@ class Photon:
         return [sigma_compton, sigma_total]
 
     def set_point_of_interaction(self):
-        self.weight = self.weight * self.sigma_compton / self.sigma_total
 
-        length = - log(random.uniform(0, 1), e) / self.sigma_total
+        self.weight = self.weight * self.sigma_compton / self.sigma_total
+        length = - math.log(random.uniform(0, 1), math.e) / self.sigma_total
 
         point_interaction = [0, 0, 0]
         point_interaction[0] = length * cos(self.psi) * cos(self.phi) + self.trajectory[-1][0]
