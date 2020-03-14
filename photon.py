@@ -40,8 +40,6 @@ class Photon:
         self.phi = random.uniform(0, 2 * pi)
         self.psi = random.uniform(0, pi)
         self.sigma_compton, self.sigma_total = self.interpolate_linear(energy_photon)
-        self.set_point_of_interaction()
-        self.set_new_energy()
 
     def interpolate_linear(self, energy):
 

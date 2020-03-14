@@ -27,7 +27,7 @@ def plot_trajectory(modeling):
 
 def main():
 
-    n = 45
+    n = 100000
     start_energy = 3.5
     surface_radius = 5
     surface_height = 2
@@ -43,7 +43,7 @@ def main():
 
     print("{:g} s".format(time.clock() - start_time))
 
-    plot_trajectory(modeling)
+    # plot_trajectory(modeling)
 
 
 if __name__ == '__main__':
