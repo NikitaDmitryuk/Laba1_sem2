@@ -29,19 +29,19 @@ def main():
 
     n = 100
     start_energy = 3.5
-    surface_radius = 5
-    surface_height = 2
+    surface_radius = 10
+    surface_height = 6
     source_height = 5
     source_width = 5
 
-    start_time = time.clock()
+    start_time = time.process_time()
 
     surface = CylinderSurface(surface_radius, surface_height)
     source = RectangularSource(source_height, source_width)
     modeling = Modeling(surface, source, n, start_energy)
     modeling.start_of_modeling()
 
-    print("{:g} s".format(time.clock() - start_time))
+    print("{:g} s".format(time.process_time() - start_time))
 
     plot_trajectory(modeling)
 

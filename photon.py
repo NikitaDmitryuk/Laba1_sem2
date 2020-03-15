@@ -34,12 +34,39 @@ class Photon:
     def __init__(self, point_born, energy_photon):
         self.trajectory = []
         self.energy_photon = []
-        self.weight = 1.0
+        self.weight = [1.0]
+        self.sigma_compton = []
+        self.sigma_total = []
         self.trajectory.append(point_born)
         self.energy_photon.append(energy_photon)
-        self.phi = random.uniform(0, 2 * pi)
-        self.psi = random.uniform(0, pi)
-        self.sigma_compton, self.sigma_total = self.interpolate_linear(energy_photon)
+        sigma_compton, sigma_total = self.interpolate_linear(energy_photon)
+        self.sigma_compton.append(sigma_compton)
+        self.sigma_total.append(sigma_total)
+
+        cos_tetha = 2 * random.random() - 1
+        cos_ksi, sin_ksi = self.get_ksi()
+        self.omega1 = cos_tetha * cos_ksi
+        self.omega2 = cos_tetha * sin_ksi
+        self.omega3 = sqrt(1 - cos_tetha * cos_tetha)
+
+        length = - math.log(random.random(), math.e) / sigma_total
+
+        point_interaction = [0, 0, 0]
+        point_interaction[0] = length * self.omega1 + self.trajectory[-1][0]
+        point_interaction[1] = length * self.omega2 + self.trajectory[-1][1]
+        point_interaction[2] = length * self.omega3 + self.trajectory[-1][2]
+        self.trajectory.append(point_interaction)
+
+    @staticmethod
+    def get_ksi():
+        while True:
+            a = 1 - 2 * random.random()
+            b = 1 - 2 * random.random()
+            d = a * a + b * b
+            if d <= 1:
+                break
+
+        return [a / sqrt(d), b / sqrt(d)]
 
     def interpolate_linear(self, energy):
 
@@ -69,9 +96,6 @@ class Photon:
         sigma_total_0 = self.sigma_total_interp[left]
         sigma_total_1 = self.sigma_total_interp[right]
 
-        if energy_photon_right - energy_photon_left == 0:
-            print('херня')
-
         sigma_compton = sigma_compton_0 + (sigma_compton_1 - sigma_compton_0) *\
                         (energy - energy_photon_left) / (energy_photon_right - energy_photon_left)
 
@@ -80,38 +104,58 @@ class Photon:
 
         return [sigma_compton, sigma_total]
 
-    def set_point_of_interaction(self):
+    def next_interaction(self):
+        sigma_total = self.sigma_total[-1]
+        sigma_compton = self.sigma_compton[-1]
+        weight = self.weight[-1] * sigma_compton / sigma_total
 
-        self.weight = self.weight * self.sigma_compton / self.sigma_total
-        length = - math.log(random.uniform(0, 1), math.e) / self.sigma_total
+        if sigma_compton / sigma_total <= random.random() or weight < e-10:
+            return False
 
-        point_interaction = [0, 0, 0]
-        point_interaction[0] = length * cos(self.psi) * cos(self.phi) + self.trajectory[-1][0]
-        point_interaction[1] = length * cos(self.psi) * sin(self.phi) + self.trajectory[-1][1]
-        point_interaction[2] = length * sin(self.psi) + self.trajectory[-1][2]
+        self.weight.append(weight)
 
-        self.trajectory.append(point_interaction)
-
-    def set_new_energy(self):
         a_old = self.get_last_energy() / self.mc2
         while True:
-            g1 = random.uniform(0, 1)
-            g2 = random.uniform(0, 1)
+            g1 = random.random()
+            g2 = random.random()
             a = a_old * (1 + 2 * a_old * g1) / (1 + 2 * a_old)
             if g2 * (1 + 2 * a_old + 1 / (1 + 2 * a_old)) < self.p(a, a_old):
                 break
 
         mu = 1 - 1 / a + 1 / a_old
-        self.psi = acos(mu) - pi / 2
-        self.phi = random.uniform(0, 2 * pi)
-        self.energy_photon.append(a_old * self.mc2 / (1 + a_old * (1 - mu)))
+        cos_ksi, sin_ksi = self.get_ksi()
+
+        energy_photon = a_old * self.mc2 / (1 + a_old * (1 - mu))
+        sigma_compton, sigma_total = self.interpolate_linear(energy_photon)
+        self.energy_photon.append(energy_photon)
+        self.sigma_total.append(sigma_total)
+        self.sigma_compton.append(sigma_compton)
+
+        omega1_ = self.omega1
+        omega2_ = self.omega2
+        omega3_ = self.omega3
+
+        omega3 = omega3_ * mu + sqrt((1 - mu * mu) * (1 - omega3_ * omega3_)) * cos_ksi
+        omega2 = (omega2_ * (mu - omega3_ * omega3) +
+                  omega1_ * sin_ksi * sqrt((1 - mu * mu) * (1 - omega3_ * omega3_))) / (1 - omega3_ * omega3_)
+        omega1 = (omega1_ * (mu - omega3_ * omega3) -
+                  omega2_ * sin_ksi * sqrt((1 - mu * mu) * (1 - omega3_ * omega3_))) / (1 - omega3_ * omega3_)
+
+        self.omega1 = omega1
+        self.omega2 = omega2
+        self.omega3 = omega3
+
+        length = - math.log(random.random(), math.e) / sigma_total
+        point_interaction = [0, 0, 0]
+        point_interaction[0] = length * omega1 + self.trajectory[-1][0]
+        point_interaction[1] = length * omega2 + self.trajectory[-1][1]
+        point_interaction[2] = length * omega3 + self.trajectory[-1][2]
+        self.trajectory.append(point_interaction)
+
+        return True
 
     def p(self, x, a_old):
         return x / a_old + a_old / x + (1 / a_old - 1 / x) * (2 + 1 / a_old - 1 / x)
-
-    def is_compton_interaction_and_set_sigma(self):
-        self.sigma_compton, self.sigma_total = self.interpolate_linear(self.get_last_energy())
-        return self.sigma_compton / self.sigma_total > random.uniform(0, 1)
 
     def get_trajectory(self):
         x = []
@@ -132,6 +176,3 @@ class Photon:
 
     def delete_last_position(self):
         self.trajectory.pop()
-
-    def is_interaction_likely(self):
-        return self.weight > 10e-11

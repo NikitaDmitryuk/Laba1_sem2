@@ -28,25 +28,26 @@ class Modeling:
 
         for _ in range(self.n):
             photon = self.source.born_photon(self.start_energy)
-            photon.set_point_of_interaction()
             if self.surface.is_in(photon):
-                photon.set_new_energy()
                 self.photones.append(photon)
 
     def set_point_interaction(self):
         photones = []
         for i in range(len(self.photones)):
             photon = self.photones[i]
-            if photon.is_compton_interaction_and_set_sigma() and photon.is_interaction_likely():
-                photon.set_point_of_interaction()
+
+            if photon.next_interaction():
+
                 if self.surface.is_in(photon):
-                    photon.set_new_energy()
                     photones.append(photon)
                 else:
                     photon.delete_last_position()
                     self.dell_photones.append(photon)
+
             else:
-                self.dell_photones.append(photon)
+                photon.delete_last_position()
+                if len(photon.trajectory) > 1:
+                    self.dell_photones.append(photon)
 
         self.photones = photones
 
