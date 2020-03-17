@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import time
+from detector import Detector
 
 
 def plot_trajectory(modeling):
@@ -25,9 +26,15 @@ def plot_trajectory(modeling):
     plt.show()
 
 
+def plot_hist(detector):
+    _, ax = plt.subplots()
+    detector.hist_rate(ax)
+    plt.show()
+
+
 def main():
 
-    n = 100
+    n = 10000
     start_energy = 3.5
     surface_radius = 10
     surface_height = 6
@@ -39,11 +46,16 @@ def main():
     surface = CylinderSurface(surface_radius, surface_height)
     source = RectangularSource(source_height, source_width)
     modeling = Modeling(surface, source, n, start_energy)
+    detector = Detector([0, 0, surface_height])
+
     modeling.start_of_modeling()
+
+    detector.flow_rate(modeling)
 
     print("{:g} s".format(time.process_time() - start_time))
 
     plot_trajectory(modeling)
+    # plot_hist(detector)
 
 
 if __name__ == '__main__':

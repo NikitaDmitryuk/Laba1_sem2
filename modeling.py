@@ -46,7 +46,7 @@ class Modeling:
 
             else:
                 photon.delete_last_position()
-                if len(photon.trajectory) > 1:
+                if len(photon.get_points_interaction()) > 1:
                     self.dell_photones.append(photon)
 
         self.photones = photones

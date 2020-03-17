@@ -32,18 +32,20 @@ class Photon:
     mc2 = 0.511
 
     def __init__(self, point_born, energy_photon):
-        self.trajectory = []
+        self.points_interaction = []
         self.energy_photon = []
         self.weight = [1.0]
         self.sigma_compton = []
         self.sigma_total = []
-        self.trajectory.append(point_born)
+        self.mu = []
+        self.points_interaction.append(point_born)
         self.energy_photon.append(energy_photon)
         sigma_compton, sigma_total = self.interpolate_linear(energy_photon)
         self.sigma_compton.append(sigma_compton)
         self.sigma_total.append(sigma_total)
 
         cos_tetha = 2 * random.random() - 1
+        self.mu.append(cos_tetha)
         cos_ksi, sin_ksi = self.get_ksi()
         self.omega1 = cos_tetha * cos_ksi
         self.omega2 = cos_tetha * sin_ksi
@@ -52,10 +54,10 @@ class Photon:
         length = - math.log(random.random(), math.e) / sigma_total
 
         point_interaction = [0, 0, 0]
-        point_interaction[0] = length * self.omega1 + self.trajectory[-1][0]
-        point_interaction[1] = length * self.omega2 + self.trajectory[-1][1]
-        point_interaction[2] = length * self.omega3 + self.trajectory[-1][2]
-        self.trajectory.append(point_interaction)
+        point_interaction[0] = length * self.omega1 + self.points_interaction[-1][0]
+        point_interaction[1] = length * self.omega2 + self.points_interaction[-1][1]
+        point_interaction[2] = length * self.omega3 + self.points_interaction[-1][2]
+        self.points_interaction.append(point_interaction)
 
     @staticmethod
     def get_ksi():
@@ -123,6 +125,7 @@ class Photon:
                 break
 
         mu = 1 - 1 / a + 1 / a_old
+        self.mu.append(mu)
         cos_ksi, sin_ksi = self.get_ksi()
 
         energy_photon = a_old * self.mc2 / (1 + a_old * (1 - mu))
@@ -147,10 +150,10 @@ class Photon:
 
         length = - math.log(random.random(), math.e) / sigma_total
         point_interaction = [0, 0, 0]
-        point_interaction[0] = length * omega1 + self.trajectory[-1][0]
-        point_interaction[1] = length * omega2 + self.trajectory[-1][1]
-        point_interaction[2] = length * omega3 + self.trajectory[-1][2]
-        self.trajectory.append(point_interaction)
+        point_interaction[0] = length * omega1 + self.points_interaction[-1][0]
+        point_interaction[1] = length * omega2 + self.points_interaction[-1][1]
+        point_interaction[2] = length * omega3 + self.points_interaction[-1][2]
+        self.points_interaction.append(point_interaction)
 
         return True
 
@@ -161,7 +164,7 @@ class Photon:
         x = []
         y = []
         z = []
-        for point in self.trajectory:
+        for point in self.points_interaction:
             x.append(point[0])
             y.append(point[1])
             z.append(point[2])
@@ -169,10 +172,25 @@ class Photon:
         return trajectory
 
     def get_last_position(self):
-        return self.trajectory[-1]
+        return self.points_interaction[-1]
 
     def get_last_energy(self):
         return self.energy_photon[-1]
 
     def delete_last_position(self):
-        self.trajectory.pop()
+        self.points_interaction.pop()
+
+    def get_points_interaction(self):
+        return self.points_interaction
+
+    def get_sigma_total(self):
+        return self.sigma_total
+
+    def get_mu(self):
+        return self.mu
+
+    def get_energy_photon(self):
+        return self.energy_photon
+
+    def get_weight(self):
+        return self.weight
