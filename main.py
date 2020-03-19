@@ -9,11 +9,24 @@ from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import time
 from detector import Detector
+import time
 
 
+def timer(f):
+    def tmp(*args, **kwargs):
+        t = time.time()
+        res = f(*args, **kwargs)
+        print("function run time: %f" % (time.time()-t))
+        return res
+
+    return tmp
+
+
+@timer
 def plot_trajectory(modeling):
+    print('plot trajectory')
     plt.rcParams['legend.fontsize'] = 10
-    fig = plt.figure()
+    fig = plt.figure(1)
     ax = fig.gca(projection='3d')
 
     modeling.get_source().plot_source(ax)
@@ -23,23 +36,30 @@ def plot_trajectory(modeling):
         trajectory = photon.get_trajectory()
         ax.plot(trajectory[0], trajectory[1], trajectory[2], '--.')
 
-    plt.show()
 
-
+@timer
 def plot_hist(detector):
-    _, ax = plt.subplots()
-    detector.hist_rate(ax)
-    plt.show()
+    print('plot hist')
+    plt.figure(2)
+    plt.clf()
+    plt.grid(linestyle='--')
+    x_list, y_list, width_list = detector.get_hist_rate()
+    plt.bar(x_list, y_list, width_list, align='edge', edgecolor='r', alpha=0.7)
+    plt.ticklabel_format(axis="y", style="sci", scilimits=(0, 0))
+    plt.xlabel('Energy, MeV')
+    plt.ylabel('Flux density')
+    plt.title('Contribution vs Energy.')
 
 
 def main():
 
     n = 10000
     start_energy = 3.5
-    surface_radius = 10
+    surface_radius = 5
     surface_height = 6
     source_height = 5
     source_width = 5
+    n_bins_hist = 5
 
     start_time = time.process_time()
 
@@ -50,12 +70,16 @@ def main():
 
     modeling.start_of_modeling()
 
-    detector.flow_rate(modeling)
+    detector.flow_rate(modeling, n_bins_hist)
 
-    print("{:g} s".format(time.process_time() - start_time))
+    print("FULL MODELING TIME: {:g} s".format(time.process_time() - start_time))
 
-    plot_trajectory(modeling)
-    # plot_hist(detector)
+    if n <= 10000:
+        plot_trajectory(modeling)
+
+    plot_hist(detector)
+
+    plt.show()
 
 
 if __name__ == '__main__':

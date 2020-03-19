@@ -6,6 +6,17 @@ from source import Source
 import numpy as np
 import collections
 from multiprocessing import Pool
+import time
+
+
+def timer(f):
+    def tmp(*args, **kwargs):
+        t = time.time()
+        res = f(*args, **kwargs)
+        print("function run time: %f" % (time.time()-t))
+        return res
+
+    return tmp
 
 
 class Modeling:
@@ -24,6 +35,7 @@ class Modeling:
     def get_source(self):
         return self.source
 
+    @timer
     def set_photones(self):
 
         for _ in range(self.n):

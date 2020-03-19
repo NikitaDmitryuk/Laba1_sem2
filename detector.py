@@ -1,6 +1,5 @@
 from modeling import Modeling
 from photon import Photon
-import matplotlib.pyplot as plt
 import numpy as np
 from math import pi, e, log, exp, sqrt
 
@@ -10,21 +9,40 @@ class Detector:
     def __init__(self, position):
         self.position = position
         self.rate = []
-        self.nu = []
+        self.energy_ranges = {}
 
-    def hist_rate(self, ax):
-        sum_hist = []
-        nu = np.array(self.nu)
-        start = nu.min
-        stop = nu.max
-        linspace = [i for i in range(1, 1000)]
-        step = [1 / x for x in linspace]
-        step.reverse()
-        ax.hist(self.nu, 10000)
+    def get_hist_rate(self):
+        x_list = []
+        y_list = []
+        width_list = []
+        for range_energy, rate in self.energy_ranges.items():
+            width = range_energy[1] - range_energy[0]
+            x_list.append(range_energy[0])
+            y_list.append(rate)
+            width_list.append(width)
 
-    def flow_rate(self, modeling):
-        nu = []
+        return [x_list, y_list, width_list]
+
+    def set_energy_ranges(self, photones, n_bins_hist):
+        energy_all = []
+        for photon in photones:
+            energy_all += photon.get_energy_photon()
+
+        max_energy = max(energy_all)
+        min_energy = min(energy_all)
+        energy_list = np.linspace(min_energy, max_energy, n_bins_hist)
+        self.energy_ranges = {(energy_list[i], energy_list[i + 1]): 0 for i in range(len(energy_list) - 1)}
+
+    def get_key_energy(self, energy):
+        keys_energy = self.energy_ranges.keys()
+        for key in keys_energy:
+            if key[0] <= energy <= key[1]:
+                return key
+
+    def flow_rate(self, modeling, n_bins_hist):
+        print('calculation of contributions to the detector')
         photones = modeling.get_delete_photones()
+        self.set_energy_ranges(photones, n_bins_hist+1)
         position = self.position
         for photon in photones:
             weight = photon.get_weight()
@@ -47,9 +65,5 @@ class Detector:
                                      ((1 + a1) / a2 * (2 * (1 + a1) / (1 + 2*a1) - log(1 + 2 * a1, e) / a1) +
                                       log(1 + 2 * a1, e) / (2 * a1) - (1 + 3 * a1) / (1 + 2 * a1)**2)
 
-                nu.append(weight[i] * exp(-sigma_total[i] * sqrt(r_pd2)) / r_pd2 * sigma_relationship)
-
-        self.nu = nu
-
-    def get_nu(self):
-        return self.nu
+                nu = weight[i] * exp(-sigma_total[i] * sqrt(r_pd2)) / r_pd2 * sigma_relationship
+                self.energy_ranges[self.get_key_energy(a1)] += nu / len(photones)
