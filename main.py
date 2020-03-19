@@ -23,11 +23,13 @@ def timer(f):
 
 
 @timer
-def plot_trajectory(modeling):
+def plot_trajectory(modeling, detector=None):
     print('plot trajectory')
     plt.rcParams['legend.fontsize'] = 10
     fig = plt.figure(1)
     ax = fig.gca(projection='3d')
+    if detector is not None:
+        ax.scatter(*detector.get_position(), color='r', s=100)
 
     modeling.get_source().plot_source(ax)
     modeling.get_surface().plot_surface(ax)
@@ -53,10 +55,10 @@ def plot_hist(detector):
 
 def main():
 
-    n = 10000
+    n = 1000
     start_energy = 3.5
-    surface_radius = 5
-    surface_height = 6
+    surface_radius = 50
+    surface_height = 60
     source_height = 5
     source_width = 5
     n_bins_hist = 5
@@ -66,7 +68,7 @@ def main():
     surface = CylinderSurface(surface_radius, surface_height)
     source = RectangularSource(source_height, source_width)
     modeling = Modeling(surface, source, n, start_energy)
-    detector = Detector([0, 0, surface_height])
+    detector = Detector(surface_height)
 
     modeling.start_of_modeling()
 
@@ -75,7 +77,7 @@ def main():
     print("FULL MODELING TIME: {:g} s".format(time.process_time() - start_time))
 
     if n <= 10000:
-        plot_trajectory(modeling)
+        plot_trajectory(modeling, detector)
 
     plot_hist(detector)
 

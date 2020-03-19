@@ -6,10 +6,13 @@ from math import pi, e, log, exp, sqrt
 
 class Detector:
 
-    def __init__(self, position):
-        self.position = position
+    def __init__(self, z, x=0, y=0):
+        self.position = [x, y, z]
         self.rate = []
         self.energy_ranges = {}
+
+    def get_position(self):
+        return self.position
 
     def get_hist_rate(self):
         x_list = []
