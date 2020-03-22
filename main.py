@@ -47,22 +47,26 @@ def plot_hist(detector):
     plt.grid(linestyle='--')
     x_list, y_list, width_list = detector.get_hist_rate()
     plt.bar(x_list, y_list, width_list, align='edge', edgecolor='r', alpha=0.7)
-    plt.ticklabel_format(axis="y", style="sci", scilimits=(0, 0))
-    plt.xlabel('Energy, MeV')
-    plt.ylabel('Flux density')
-    plt.title('Contribution vs Energy.')
+    plt.ticklabel_format(axis="y", style="sci", scilimits=(-2, 3))
+    plt.ticklabel_format(axis="x", style="sci", scilimits=(-2, 3))
+    plt.xlabel('Энергия, МэВ')
+    plt.ylabel('Плотность потока')
+    plt.title('Зависимость вклада от энергии фотона')
+    position = detector.get_position()
+    plt.suptitle('Шайба высотой {}, координаты детектора ({}, {}, {}), количество частиц {:.1e}'
+                 .format(position[2], position[0], position[1], position[2], n))
+
+
+n = 100000
+start_energy = 3.5
+surface_radius = 20
+surface_height = 60
+source_height = 5
+source_width = 5
+n_bins_hist = 20
 
 
 def main():
-
-    n = 1000
-    start_energy = 3.5
-    surface_radius = 50
-    surface_height = 60
-    source_height = 5
-    source_width = 5
-    n_bins_hist = 5
-
     start_time = time.process_time()
 
     surface = CylinderSurface(surface_radius, surface_height)
