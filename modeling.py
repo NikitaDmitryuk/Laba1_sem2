@@ -21,13 +21,14 @@ def timer(f):
 
 class Modeling:
 
-    def __init__(self, surface, source, n, start_energy):
+    def __init__(self, surface, source, n, start_energy, min_energy):
         self.photones = []
         self.dell_photones = []
         self.surface = surface
         self.source = source
         self.n = n
         self.start_energy = start_energy
+        self.min_energy = min_energy
 
     def get_surface(self):
         return self.surface
@@ -48,7 +49,7 @@ class Modeling:
         for i in range(len(self.photones)):
             photon = self.photones[i]
 
-            if photon.next_interaction():
+            if photon.next_interaction(self.min_energy):
 
                 if self.surface.is_in(photon):
                     photones.append(photon)

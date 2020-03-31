@@ -26,13 +26,8 @@ class Detector:
 
         return [x_list, y_list, width_list]
 
-    def set_energy_ranges(self, photones, n_bins_hist):
-        energy_all = []
-        for photon in photones:
-            energy_all += photon.get_energy_photon()
+    def set_energy_ranges(self, n_bins_hist, max_energy, min_energy):
 
-        max_energy = max(energy_all)
-        min_energy = min(energy_all)
         energy_list = np.linspace(min_energy, max_energy, n_bins_hist)
         self.energy_ranges = {(energy_list[i], energy_list[i + 1]): 0 for i in range(len(energy_list) - 1)}
 
@@ -42,10 +37,10 @@ class Detector:
             if key[0] <= energy <= key[1]:
                 return key
 
-    def flow_rate(self, modeling, n_bins_hist):
+    def flow_rate(self, modeling, n_bins_hist, energy_max, energy_min):
         print('calculation of contributions to the detector')
         photones = modeling.get_delete_photones()
-        self.set_energy_ranges(photones, n_bins_hist+1)
+        self.set_energy_ranges(n_bins_hist+1, energy_max, energy_min)
         position = self.position
         for photon in photones:
             weight = photon.get_weight()

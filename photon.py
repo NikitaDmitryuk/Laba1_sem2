@@ -106,12 +106,12 @@ class Photon:
 
         return [sigma_compton, sigma_total]
 
-    def next_interaction(self):
+    def next_interaction(self, min_energy):
         sigma_total = self.sigma_total[-1]
         sigma_compton = self.sigma_compton[-1]
         weight = self.weight[-1] * sigma_compton / sigma_total
 
-        if sigma_compton / sigma_total <= random.random() or weight < e-10:
+        if sigma_compton / sigma_total <= random.random() or weight < e-10 or min_energy > self.get_last_energy():
             return False
 
         self.weight.append(weight)

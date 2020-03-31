@@ -19,7 +19,7 @@ class RectangularSource(Source):
         point_born[2] = 0
         return Photon(point_born, energy)
 
-    def plot_source(self, ax):
+    def plot_source(self, ax, d3='3d'):
         x0 = self.xy0[0]
         x1 = self.xy1[0]
         y0 = self.xy0[1]
@@ -27,4 +27,7 @@ class RectangularSource(Source):
         x = [x0, x0, x1, x1, x0]
         y = [y0, y1, y1, y0, y0]
         z = [0, 0, 0, 0, 0]
-        ax.plot(x, y, z)
+        if d3 == '3d':
+            ax.plot(x, y, z)
+        else:
+            ax.plot(x, y)
